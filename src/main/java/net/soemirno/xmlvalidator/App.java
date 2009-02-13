@@ -8,17 +8,13 @@ import java.io.File;
 /**
  * Responsible for starting application.
  */
-public abstract class App {
+public class App implements XmlValidator {
 
     private static XmlValidator validator;
     private static Logger logger = LoggerFactory.getLogger(XmlValidator.class);
 
     static {
-        validator = new XmlValidator() {
-            public void validate(File schema, File xml) {
-                logger.info("validating " + xml.getName() + " with " + schema.getName());
-            }
-        };
+        validator = new App();
     }
 
     public static void main(String[] args) {
@@ -28,4 +24,13 @@ public abstract class App {
     static void setValidator(XmlValidator aValidator) {
         validator = aValidator;
     }
+
+    static void setLogger(Logger aLogger) {
+        logger = aLogger;
+    }
+
+    public void validate(File schema, File xml) {
+        logger.info("validating " + xml.getName() + " with " + schema.getName());
+    }
+
 }

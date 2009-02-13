@@ -7,6 +7,7 @@ import org.jmock.integration.junit4.JUnit4Mockery;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
 
 import java.io.File;
 
@@ -18,10 +19,12 @@ public class AppTest {
 
     Mockery context = new JUnit4Mockery();
     private XmlValidator validator;
+    private Logger logger;
 
     @Before
     public void setUp() {
         validator = context.mock(XmlValidator.class);
+        logger = context.mock(Logger.class);
         App.setValidator(validator);
     }
 
@@ -34,4 +37,15 @@ public class AppTest {
 
         App.main(new String[]{"schemaname", "xmlfile"});
     }
+
+    @Test
+    public void shouldLogValidationStart() {
+        context.checking(new Expectations() {{
+            oneOf(logger).info(with(equal("validating xmlfile with schemaname")));
+        }});
+        App.setLogger(logger);
+        XmlValidator validator = new App();
+        validator.validate(new File("schemaname"), new File("xmlfile"));
+    }
+
 }
