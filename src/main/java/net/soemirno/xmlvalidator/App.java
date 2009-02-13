@@ -5,7 +5,7 @@ import java.io.File;
 /**
  * Responsible for starting application.
  */
-public class App {
+public abstract class App {
 
     private static XmlValidator validator;
 
@@ -13,7 +13,7 @@ public class App {
         validator.validate(new File(args[0]), new File(args[1]));
     }
 
-    public static void setValidator(XmlValidator aValidator) {
+    static void setValidator(XmlValidator aValidator) {
         validator = aValidator;
     }
 }
