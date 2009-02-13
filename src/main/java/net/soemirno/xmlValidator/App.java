@@ -1,4 +1,4 @@
-package xmlValidator;
+package net.soemirno.xmlValidator;
 
 /**
  * Hello world!

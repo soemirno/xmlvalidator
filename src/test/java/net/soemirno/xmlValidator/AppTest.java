@@ -1,4 +1,4 @@
-package xmlValidator;
+package net.soemirno.xmlValidator;
 
 import static org.junit.Assert.assertTrue;
 
@@ -9,11 +9,8 @@ public class AppTest
 
 {
 
-    /**
-     * Rigourous Test :-)
-     */
     @org.junit.Test
-    public void testApp() {
+    public void testApp() {        
         assertTrue(true);
     }
 }
