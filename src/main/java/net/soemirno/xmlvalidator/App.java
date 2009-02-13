@@ -9,6 +9,13 @@ public abstract class App {
 
     private static XmlValidator validator;
 
+    static {
+        validator = new XmlValidator() {
+            public void validate(File schema, File xml) {
+            }
+        };
+    }
+
     public static void main(String[] args) {
         validator.validate(new File(args[0]), new File(args[1]));
     }
