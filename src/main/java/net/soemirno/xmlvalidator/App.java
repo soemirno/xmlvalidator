@@ -1,5 +1,8 @@
 package net.soemirno.xmlvalidator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 
 /**
@@ -8,10 +11,12 @@ import java.io.File;
 public abstract class App {
 
     private static XmlValidator validator;
+    private static Logger logger = LoggerFactory.getLogger(XmlValidator.class);
 
     static {
         validator = new XmlValidator() {
             public void validate(File schema, File xml) {
+                logger.info("validating " + xml.getName() + " with " + schema.getName());
             }
         };
     }
