@@ -4,7 +4,7 @@
     <groupId>net.soemirno</groupId>
     <artifactId>xmlvalidator</artifactId>
     <packaging>jar</packaging>
-    <version>1.0</version>
+    <version>1.1</version>
     <name>net.soemirno.xmlvalidator</name>
     <url>http://maven.apache.org</url>
     <dependencies>
