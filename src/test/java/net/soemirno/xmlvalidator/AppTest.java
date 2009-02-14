@@ -26,6 +26,7 @@ public class AppTest {
         validator = context.mock(XmlValidator.class);
         logger = context.mock(Logger.class);
         App.setValidator(validator);
+        App.setLogger(logger);
     }
 
     @Test
@@ -39,13 +40,39 @@ public class AppTest {
     }
 
     @Test
-    public void shouldLogValidationStart() {
+    public void shouldLogValidationStartAndEnd() {
         context.checking(new Expectations() {{
-            oneOf(logger).info(with(equal("validating xmlfile with schemaname")));
+            oneOf(logger).info(with(equal("validating valid.xml with schema.xsd")));
+            oneOf(logger).info(with(equal("finished validating valid.xml with schema.xsd")));
         }});
-        App.setLogger(logger);
         XmlValidator validator = new App();
-        validator.validate(new File("schemaname"), new File("xmlfile"));
+        validator.validate(getResourceFile("schema.xsd"), getResourceFile("valid.xml"));
+    }
+
+    private File getResourceFile(String filename) {
+        return new File(this.getClass().getClassLoader().getResource(filename).getFile());
+    }
+
+    @Test
+    public void shouldReturnSchemaNotFoundError() {
+        context.checking(new Expectations() {{
+            allowing(logger).info(with(any(String.class)));
+            oneOf(logger).error("Schemafile schemaname not found.");
+        }});
+
+        XmlValidator validator = new App();
+        validator.validate(new File("schemaname"), getResourceFile("valid.xml"));
+    }
+
+    @Test
+    public void shouldReturnSourceNotFoundError() {
+        context.checking(new Expectations() {{
+            allowing(logger).info(with(any(String.class)));
+            oneOf(logger).error("Sourcefile xmlfile not found.");
+        }});
+
+        XmlValidator validator = new App();
+        validator.validate(getResourceFile("schema.xsd"), new File("xmlfile"));
     }
 
 }
