@@ -25,7 +25,7 @@ public class App implements XmlValidator {
     /**
      * Wrapper for exceptions thrown in XmlValidator.
      */
-    private class XmlValidatorException extends RuntimeException {
+    static class XmlValidatorException extends RuntimeException {
         XmlValidatorException(final Throwable throwable) {
             super(throwable);
         }
@@ -34,15 +34,7 @@ public class App implements XmlValidator {
     /**
      * Responsible for logging validation errors.
      */
-    private class ValidationErrorLogger implements ErrorHandler {
-
-        private String createMessage(final SAXParseException exception) {
-            return format(
-                    "Line {0,number,integer}, column {1,number,integer} : {2}",
-                    exception.getLineNumber(),
-                    exception.getColumnNumber(),
-                    exception.getMessage());
-        }
+    static class ValidationErrorLogger implements ErrorHandler {
 
         public void warning(final SAXParseException validationError) throws SAXException {
             logger.warn(createMessage(validationError));
@@ -66,27 +58,24 @@ public class App implements XmlValidator {
     }
 
     public void validate(final File schema, final File xml) {
-        if (filesInvalid(schema, xml)) {
-            return;
-        }
+        assertFilesExist(schema, xml);
         logger.info(format("validating {0} with {1}", xml.getName(), schema.getName()));
         validate(createSchemaValidator(schema), xml);
         logger.info(format("finished validating {0} with {1}", xml.getName(), schema.getName()));
     }
 
-    private boolean filesInvalid(final File schema, final File xml) {
+    static void assertFilesExist(final File schema, final File xml) {
         if (!schema.exists()) {
-            logger.error(format("Schemafile {0} not found.", schema.getName()));
-            return true;
+            throw new XmlValidatorException(
+                    new IOException(format("Schemafile {0} not found.", schema.getName())));
         }
         if (!xml.exists()) {
-            logger.error(format("Sourcefile {0} not found.", xml.getName()));
-            return true;
+            throw new XmlValidatorException(
+                    new IOException(format("Sourcefile {0} not found.", xml.getName())));
         }
-        return false;
     }
 
-    private void validate(final Validator aValidator, final File xml) {
+    static void validate(final Validator aValidator, final File xml) {
         try {
             aValidator.setErrorHandler(new ValidationErrorLogger());
             aValidator.validate(new StreamSource(xml));
@@ -97,12 +86,12 @@ public class App implements XmlValidator {
         }
     }
 
-    private Validator createSchemaValidator(final File schema) {
+    static Validator createSchemaValidator(final File schema) {
         final SchemaFactory factory = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
         try {
             return factory.newSchema(new StreamSource(schema)).newValidator();
         } catch (SAXException e) {
-            throw new XmlValidatorException(e);
+            throw new App.XmlValidatorException(e);
         }
     }
 
@@ -113,4 +102,13 @@ public class App implements XmlValidator {
     static void setLogger(final Logger aLogger) {
         logger = aLogger;
     }
+
+    static String createMessage(final SAXParseException exception) {
+        return format(
+                "Line {0,number,integer}, column {1,number,integer} : {2}",
+                exception.getLineNumber(),
+                exception.getColumnNumber(),
+                exception.getMessage());
+    }
+
 }
