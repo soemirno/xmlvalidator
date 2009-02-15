@@ -1,63 +1,70 @@
 package net.soemirno.xmlvalidator;
 
+import junit.framework.Assert;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Unit test for simple App.
  */
 @RunWith(JMock.class)
-public class AppTest {
+public class AppTest extends AbstractValidatorTestCase {
 
     Mockery context = new JUnit4Mockery();
     private XmlValidator validator;
+    private XmlValidatorFactory validatorFactory;
 
     @Before
     public void setUp() {
         validator = context.mock(XmlValidator.class);
-        App.setValidator(validator);
+        validatorFactory = context.mock(XmlValidatorFactory.class);
     }
 
     @After
     public void tearDown() {
-        App.setValidator(new DefaultXmlValidator());
+        App.setDefaultFactory();
     }
 
     @Test
     public void shouldCallValidatorWithArgValues() throws IOException, SAXException {
+        App.setValidatorFactory(validatorFactory);
+        final String[] arguments = {getResourceFile("schema.xsd").getAbsolutePath(),
+                getResourceFile("valid.xml").getAbsolutePath()};
+
         context.checking(new Expectations() {{
-            oneOf(validator).validate(with(equal(new File("schemaname"))), with(equal(new File("xmlfile"))));
+            oneOf(validatorFactory).createValidator(with(equal(new File(arguments[0]))));
+            will(returnValue(validator));
+            oneOf(validator).validate(with(equal(new File(arguments[1]))));
         }});
-        App.main(new String[]{"schemaname", "xmlfile"});
+        App.main(arguments);
     }
 
     @Test
-    public void testPrivateConstructors() throws
-            IllegalAccessException,
-            InvocationTargetException,
-            InstantiationException {
+    public void shouldLogErrors() throws IOException, SAXException {
+        try {
+            App.main(new String[]{"schemaname", "xmlfile"});
+            fail("should throw exception");
+        } catch (XmlValidator.XmlValidatorException e) {
+            Assert.assertEquals(SAXParseException.class, e.getCause().getClass());
+        }
+    }
+
+    @Test
+    public void testPrivateConstructors() {
 
         assertPrivateConstructor(App.class);
-        assertPrivateConstructor(Util.class);
     }
 
-    private void assertPrivateConstructor(Class<?> aClass) throws InstantiationException, IllegalAccessException, InvocationTargetException {
-        final Constructor<?> constructor = aClass.getDeclaredConstructors()[0];
-        constructor.setAccessible(true);
-        final Object n = constructor.newInstance((Object[]) null);
-        assertEquals("should have class instance", aClass, n.getClass());
-    }
 }

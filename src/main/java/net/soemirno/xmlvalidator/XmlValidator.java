@@ -1,9 +1,6 @@
 package net.soemirno.xmlvalidator;
 
-import org.xml.sax.SAXException;
-
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Validates xml files based upon schema.
@@ -18,5 +15,5 @@ public interface XmlValidator {
         }
     }
 
-    void validate(File schema, File xml) throws IOException, SAXException;
+    void validate(File xml);
 }
