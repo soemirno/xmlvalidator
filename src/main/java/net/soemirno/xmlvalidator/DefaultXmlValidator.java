@@ -1,13 +1,14 @@
 package net.soemirno.xmlvalidator;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.slf4j.LoggerFactory.getLogger;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Schema;
+import static javax.xml.validation.SchemaFactory.newInstance;
 import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +19,8 @@ import static java.text.MessageFormat.format;
  */
 public class DefaultXmlValidator implements XmlValidator {
 
-    private Logger logger;
-    private Validator validator;
+    private final Logger logger;
+    private final Validator validator;
 
     DefaultXmlValidator(final File schema, final Logger defaultLogger) {
         this(schema, defaultLogger, new LoggingErrorHandler(defaultLogger));
@@ -32,13 +33,14 @@ public class DefaultXmlValidator implements XmlValidator {
     }
 
     public DefaultXmlValidator(final File schema) {
-        this(schema, LoggerFactory.getLogger(DefaultXmlValidator.class));
+        this(schema, getLogger(DefaultXmlValidator.class));
     }
 
-    static Validator createValidator(final File schema, final ErrorHandler errorHandler) {
-        final SchemaFactory factory = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
+    static Validator createValidator(final File schemaFile, final ErrorHandler errorHandler) {
         try {
-            final Validator validator = factory.newSchema(new StreamSource(schema)).newValidator();
+            final StreamSource source = new StreamSource(schemaFile);
+            final Schema schema = newInstance(W3C_XML_SCHEMA_NS_URI).newSchema(source);
+            final Validator validator = schema.newValidator();
             if (errorHandler != null) {
                 validator.setErrorHandler(errorHandler);
             }

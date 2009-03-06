@@ -25,7 +25,7 @@ public final class App {
 
     static void setDefaultFactory() {
         validatorFactory = new XmlValidatorFactory() {
-            public XmlValidator createValidator(File schema) {
+            public XmlValidator createValidator(final File schema) {
                 return new DefaultXmlValidator(schema);
             }
         };
